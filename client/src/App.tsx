@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Container, Row, Col, Button, Table, Modal } from 'react-bootstrap';
-import { PDFDownloadLink, View, Document, Page, Text } from '@react-pdf/renderer';
+import { PDFViewer, Document, Page, Text, View, PDFDownloadLink } from '@react-pdf/renderer';
 import { styles } from './style/pdf-style';
 import XLSX from 'xlsx';
 
@@ -24,60 +24,422 @@ function App() {
             console.error('Error while sending request: ', e);
         })
     }
-
+    
+    // Generate PDF document
     const RefundDocument = () => (
         <Document>
-            <Page style={styles.page}>
-                <View style={styles.container}>
-                    <Text style={styles.heading}>Refund To: EXXONMOBIL BUSINESS SUPPORT CENTRE MALAYSIA</Text>
-                    <View style={styles.section}>
-                    <View style={styles.row}>
-                        <Text>TICKET NUMBER: XXX</Text>
-                        <Text>REFUND NO: XXX</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text>REFUND TYPE: XXX</Text>
-                        <Text>INVOICE NO: XXX</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Text>REFUND CREATED DATE: XXX</Text>
-                        <Text>TCID: XXX</Text>
-                    </View>
-                    </View>
-                    <View style={styles.section}>
-                    <Text style={styles.part}>PART (A)</Text>
-                    <Text style={styles.attribute}>ATTRIBUTE</Text>
-                    <View style={styles.table}>
-                        <View style={styles.tableRow}>
-                        <Text>AIR FARE (GROSS)</Text>
-                        <Text style={styles.alignRight}>19,164.00</Text>
+            {
+                refundData.map((refund) => (
+                    <Page size={'A4'} key={refund.rf_number}>
+                        <View style={styles.container}>
+                            <Text style={styles.heading}>Refund To: {refund.rf_custname}</Text>
+                            <View>
+                                <View style={[styles.section, styles.border]}>
+                                    <View style={styles.row}>
+                                        <View style={styles.col}>
+                                            <View style={styles.row}>
+                                            <Text style={[styles.boldText, styles.text]}>TICKET NUMBER:</Text>
+                                                <Text style={styles.text}>{refund.rf_airno} {refund.rf_ticketno}</Text>
+                                            </View>
+                                            <View style={styles.row}>
+                                                <Text style={[styles.boldText, styles.text]}>REFUND TYPE:</Text>
+                                                <Text style={styles.text}>{refund.rf_type}</Text>
+                                            </View>
+                                            <View style={styles.row}>
+                                                <Text style={[styles.boldText, styles.text]}>REFUND CREATED DATE:</Text>
+                                                <Text style={styles.text}>{refund.rf_date}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.col}>
+                                            <View style={styles.row}>
+                                                <Text style={[styles.boldText, styles.text]}>REFUND NO:</Text>
+                                                <Text style={styles.text}>{refund.rf_number}</Text>
+                                            </View>
+                                            <View style={styles.row}>
+                                                <Text style={[styles.boldText, styles.text]}>INVOICE NO:</Text>
+                                                <Text style={styles.text}>{refund.rf_invcno}</Text>
+                                            </View>
+                                            <View style={styles.row}>
+                                                <Text style={[styles.boldText, styles.text]}>TCID:</Text>
+                                                <Text style={styles.text}>{refund.rf_userid}</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                    
+                                </View>
+                                <View style={[styles.section, styles.border]}>
+                                    <View style={styles.row}>
+                                        <View style={styles.col}>
+                                            <Text style={[styles.boldText, styles.text]}>PART (A)</Text>
+                                            <Text style={[styles.boldText, styles.text]}>REFUND CALCULATION FROM AIRLINE</Text>
+                                            
+                                            <View style={styles.table}>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                    <Text style={[styles.boldText, styles.text]}>AIR FARE (GROSS)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                    <Text style={styles.text}>{refund.rf_afgross}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: COMMISSION</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_commission}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>AIR FARE (NETT)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_afnett}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>ADD: TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_taxes}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>ADD: D8 GST TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_gsttax}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: GST ON COMM</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_gstcomm}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>TOTAL:</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_total}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: PARTIALLY UTILISED AIR FARES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_partiallyut}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: UTILISED TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_utilisedtax}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: UTILISED D8 GST TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_uitilisedgst}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE NO SHOW FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_airnoshowfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE CANCELLATION FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_aircancellation}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE ADMIN/HANDLING FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_airadminfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>ADJUSTMENT AMOUNT</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_adjustamt}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>TOTAL REFUND FROM AIRLINES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_totalrefund}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>Retain Mark Up</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_markup}</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+
+
+                                            <Text style={[styles.boldText, styles.text]}>PART (B)</Text>
+                                            <Text style={[styles.boldText, styles.text]}>INVOICE</Text>
+
+                                            <View style={styles.table}>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>AIR FARE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invairfare}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>MARK-UP (%)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invmarkup}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invtaxes}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>D8 TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invd8tax}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>TRANSACTION FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invtransfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>AGENT COLLECTION FEE (ACF)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invagentfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>MERCHANT FEE (CC)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invmerchfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>AOHES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invcaohes}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>TOTAL INVOICE AMOUNT</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_invtotalamt}</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+
+
+                                            <Text style={[styles.boldText, styles.text]}>PART (C)</Text>
+                                            <Text style={[styles.boldText, styles.text]}>CREDIT NOTE</Text>
+
+                                            <View style={styles.table}>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: PARTIALLY UTILISED AIR FARES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnpartiallyut}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: UTILISED TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnuttax}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: UTILISED D8 GST TAXES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnutd8tax}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE NO SHOW FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnnoshowfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE CANCELLATION FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnaircancellation}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AIRLINE ADMIN/HANDLING FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnadminfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AGENT TICKET FEE (TRXN/MARK-UP)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cntrxn}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AGENT COLLECTION FEE (ACF)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnacf}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: OTHERS FEE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnothersfee}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: AOHES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnaohes}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>LESS: MISC CHARGES (ADDL)</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnmisc}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>RETURN MARK UP TO CUSTOMER</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnreturnmarkup}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>TOTAL REFUND TO CUSTOMER - CREDIT NOTE</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cntotalrefund}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>TAX INVOICE FOR REFUND FEES</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cntaxinvc}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.tableRow}>
+                                                    <View style={[styles.tableCell, styles.boldText]}>
+                                                        <Text style={styles.text}>NET REFUND</Text>
+                                                    </View>
+                                                    <View style={styles.tableCell}>
+                                                        <Text style={styles.text}>{refund.rf_cnnetrefund}</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={styles.section}>
+                                    <View style={styles.row}>
+                                        <View style={styles.col}>
+                                            <Text style={styles.text}>PART A & B TO BE COMPLETED BY TC</Text>
+                                            <Text style={styles.text}>PART C FOR ACCOUNTS DEPT</Text>
+                                            <Text style={[styles.boldText, styles.text]}>REMARK:</Text>
+                                            <Text style={styles.text}>{refund.rf_remark}</Text>
+                                            <View style={styles.row}>
+                                                <View style={styles.col}>
+                                                    <Text style={[styles.boldText, styles.text]}>Prepared By:</Text>
+                                                    <Text style={styles.text}>{refund.rf_preparedby}</Text>
+                                                    <Text style={styles.text}>{refund.rf_prepareddate}</Text>
+                                                </View>
+                                                <View style={styles.col}>
+                                                    <Text style={[styles.boldText, styles.text]}>Checked By:</Text>
+                                                    <Text style={styles.text}>{refund.rf_checkedby}</Text>
+                                                    <Text style={styles.text}>{refund.rf_checkeddate}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                                
+                            </View>
                         </View>
-                        <View style={styles.tableRow}>
-                        <Text>LESS COMMISSION</Text>
-                        <Text style={styles.alignRight}>0.00</Text>
-                        </View>
-                    </View>
-                    </View>
-                    <View style={styles.section}>
-                    <Text>PART A & B TO BE COMPLETED BY TC</Text>
-                    <Text>PART C FOR ACCOUNTS DEPT</Text>
-                    <Text style={styles.remark}>REMARK:</Text>
-                    <Text>BSP: P2 NOV 22</Text>
-                    <View style={styles.signatureRow}>
-                        <View style={styles.signatureCol}>
-                        <Text>Prepared By:</Text>
-                        <Text>name</Text>
-                        <Text>date</Text>
-                        </View>
-                        <View style={styles.signatureCol}>
-                        <Text>Checked By:</Text>
-                        <Text>name</Text>
-                        <Text>date</Text>
-                        </View>
-                    </View>
-                    </View>
-                </View>
-            </Page>
+                    </Page>
+                ))
+            }
         </Document>
     )
     
@@ -91,38 +453,49 @@ function App() {
                 {
                     refundData.length > 0 ? (
                         <div>
+                            <div>
+                                <PDFViewer style={styles.pageView}>
+                                    <RefundDocument />
+                                </PDFViewer>
+                            </div>
                             
                             {
                                 refundData.map((refund) => (
                                     <div key={refund.rf_number}>
-                                        <h4>Refund To: {refund.rf_custname}</h4>
+                                        <h4 className='ps-4'>Refund To: {refund.rf_custname}</h4>
                                         <Row>
                                             <Col>
                                                 <div className="border p-4">
-                                                <Row>
-                                                    <Col>
-                                                        <span className='fw-bold'>TICKET NUMBER: </span>{refund.rf_airno} {refund.rf_ticketno}
-                                                    </Col>
-                                                    <Col>
-                                                    <span className='fw-bold'>REFUND NO: </span>{refund.rf_number}
-                                                    </Col>
-                                                </Row>
-                                                <Row>
-                                                    <Col>
-                                                        <span className='fw-bold'>REFUND TYPE: </span>{refund.rf_type}
-                                                    </Col>
-                                                    <Col>
-                                                        <span className='fw-bold'>INVOICE NO: </span>{refund.rf_invcno}
-                                                    </Col>
-                                                </Row>
-                                                <Row>
-                                                    <Col>
-                                                        <span className='fw-bold'>REFUND CREATED DATE: </span>{refund.rf_date}
-                                                    </Col>
-                                                    <Col>
-                                                        <span className='fw-bold'>TCID: </span>{refund.rf_userid}
-                                                    </Col>
-                                                </Row>
+                                                    <Row>
+                                                        <Col>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>TICKET NUMBER: </span></Col>
+                                                                <Col>{refund.rf_airno} {refund.rf_ticketno}</Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>REFUND TYPE: </span></Col>
+                                                                <Col>{refund.rf_type}</Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>REFUND CREATED DATE: </span></Col>
+                                                                <Col>{refund.rf_date}</Col>
+                                                            </Row>
+                                                        </Col>
+                                                        <Col>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>REFUND NO: </span></Col>
+                                                                <Col>{refund.rf_number}</Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>INVOICE NO: </span></Col>
+                                                                <Col>{refund.rf_invcno}</Col>
+                                                            </Row>
+                                                            <Row>
+                                                                <Col md={4}><span className='fw-bold'>TCID: </span></Col>
+                                                                <Col>{refund.rf_userid}</Col>
+                                                            </Row>
+                                                        </Col>
+                                                    </Row>
                                                 </div>
                                             </Col>
                                         </Row>

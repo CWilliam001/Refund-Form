@@ -1,0 +1,1 @@
+Remember go to server>env file to change your DB_USER, DB_PASSWORD
